@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  app:
+    container_name: app
+    # image: node:10.20.1
+    build: ./ # you can use image or docker file to build
+    command: npm run debug-brk
+    # working_dir: /app
+    restart: always
+    ports: 
+      - "5000:5000"
+      - "9229:9229"
+    depends_on:
+      - mongo
+    links: 
+      - mongo
+    volumes:
+      - ./:/usr/src/app
+      - ./node_modules:/usr/src/app/node_modules
+    environment:
+      - ENV=dev
+      - MONGO_HOST=mongodb://mongo:mongo@localhost:27027/users
+    # networks:
+    #   - backend-network
+
+  mongo:
+    container_name: app-mongo
+    image: mongo:4.2
+    restart: on-failure
+    environment:
+      - MONGODB_USERNAME=mongo
+      - MONGODB_PASSWORD=mongo
+      - MONGODB_DATABASE=users
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MONGODB_ROOT_PASSWORD=mongo
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27027:27017"
+    # networks:
+    #   - mongo-network
+
+# networks: 
+#   mongo-network:
+#     driver: bridge
+#   backend-network:
+#     driver: bridge
+
+  # mysql:
+  #   container_name: mysql
+  #   image: mysql:5.7
+  #   ports: 
+  #     - "3306:3306"
+  #   environment:
+  #     - MYSQL_DATABASE=kovi_development
+  #     - MYSQL_USER=root
+  #     - MYSQL_ALLOW_EMPTY_PASSWORD=yes
